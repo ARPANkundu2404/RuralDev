@@ -61,6 +61,10 @@ class UserResponseSchema(Schema):
     role = fields.Str()
     is_active = fields.Bool()
     is_verified = fields.Bool()
+    is_profile_complete = fields.Bool()
+    bio = fields.Str()
+    skills = fields.Str()
+    location = fields.Str()
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
 
@@ -70,6 +74,13 @@ class UserUpdateSchema(Schema):
     username = fields.Str(validate=validate.Length(min=3, max=80))
     email = fields.Email()
     password = fields.Str(validate=validate.Length(min=8, max=255))
+
+
+class ProfileCompleteSchema(Schema):
+    """Schema for completing user profile."""
+    bio = fields.Str(required=True, validate=validate.Length(min=10, max=500))
+    skills = fields.Str(required=True, validate=validate.Length(min=3))
+    location = fields.Str(required=True, validate=validate.Length(min=3, max=255))
 
 
 class JwtResponseSchema(Schema):
