@@ -140,17 +140,29 @@ export const jobsAPI = {
   getById: (id) => api.get(`/jobs/${id}`),
   create: (data) => api.post("/jobs", data),
   update: (id, data) => api.put(`/jobs/${id}`, data),
-  apply: (id) => api.post(`/jobs/${id}/apply`),
+  delete: (id) => api.delete(`/jobs/${id}`),
+  approve: (id) => api.patch(`/jobs/${id}/approve`),
+  reject: (id, reason) => api.patch(`/jobs/${id}/reject`, { reason }),
+};
+
+// ─── Products Endpoints ────────────────────────────────────────────────────────
+export const productAPI = {
+  getAll: (params) => api.get("/products", { params }),
+  getById: (id) => api.get(`/products/${id}`),
+  create: (data) => api.post("/products", data),
+  update: (id, data) => api.put(`/products/${id}`, data),
+  delete: (id) => api.delete(`/products/${id}`),
+  approve: (id) => api.patch(`/products/${id}/approve`),
+  reject: (id, reason) => api.patch(`/products/${id}/reject`, { reason }),
 };
 
 // ─── Marketplace Endpoints ────────────────────────────────────────────────────
 export const marketplaceAPI = {
-  getProducts: (params) => api.get("/marketplace/products", { params }),
-  getProduct: (id) => api.get(`/marketplace/products/${id}`),
-  createProduct: (data) => api.post("/marketplace/products", data),
-  updateProduct: (id, data) => api.put(`/marketplace/products/${id}`, data),
-  deleteProduct: (id) => api.delete(`/marketplace/products/${id}`),
-  purchaseProduct: (id) => api.post(`/marketplace/products/${id}/purchase`),
+  getProducts: (params) => api.get("/products", { params }),
+  getProduct: (id) => api.get(`/products/${id}`),
+  createProduct: (data) => api.post("/products", data),
+  updateProduct: (id, data) => api.put(`/products/${id}`, data),
+  deleteProduct: (id) => api.delete(`/products/${id}`),
 };
 
 // ─── Admin Endpoints ──────────────────────────────────────────────────────────

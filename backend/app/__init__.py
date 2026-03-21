@@ -1,6 +1,8 @@
 """
 RuralDev Flask Application Factory
 Initializes the Flask app with all extensions and blueprints.
+Uses Flask Blueprints for RESTful API with JWT security.
+Note: See MIGRATION_GUIDE.md for upgrading to flask-smorest for Swagger UI.
 """
 
 import os
@@ -11,7 +13,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from flask_migrate import Migrate
-from flasgger import Flasgger
 
 # Configure logging
 logging.basicConfig(
@@ -55,17 +56,57 @@ def create_app(config_name="development"):
     db.init_app(app)
     jwt.init_app(app)
     migrate.init_app(app, db)
-    CORS(app)
-    Flasgger(app)
     
-    # Register blueprints
+    # Configure CORS for development and production
+    if app.config.get("DEBUG"):
+        # Development: Allow requests from Vite dev server and local origins
+        CORS(
+            app,
+            resources={
+                r"/api/*": {
+                    "origins": [
+                        "http://localhost:5173",  # Vite dev server
+                        "http://localhost:3000",  # Alternative dev port
+                        "http://127.0.0.1:5173",
+                        "http://127.0.0.1:3000",
+                    ],
+                    "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+                    "allow_headers": ["Content-Type", "Authorization"],
+                    "supports_credentials": True,
+                }
+            }
+        )
+    else:
+        # Production: Use environment variable for allowed origins
+        allowed_origins = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+        CORS(
+            app,
+            resources={
+                r"/api/*": {
+                    "origins": allowed_origins,
+                    "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+                    "allow_headers": ["Content-Type", "Authorization"],
+                    "supports_credentials": True,
+                }
+            }
+        )
+    
+    # Register blueprints for API routes
+    # All endpoints are available at /api/<resource>
+    # Full documentation available at: see MIGRATION_GUIDE.md for Swagger UI setup
+    
+    # Register blueprints (existing routes continue to work)
     from app.routes.auth_routes import auth_bp
     from app.routes.user_routes import user_bp
     from app.routes.workshop_routes import workshop_bp
+    from app.routes.job_routes import job_bp
+    from app.routes.product_routes import product_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(workshop_bp)
+    app.register_blueprint(job_bp)
+    app.register_blueprint(product_bp)
     
     # Create tables with error handling
     with app.app_context():

@@ -13,6 +13,8 @@ from app.schemas.user_schema import (
     JwtResponseSchema,
     ErrorResponseSchema,
     WorkshopSchema,
+    JobSchema,
+    ProductSchema,
 )
 
 __all__ = [
@@ -25,4 +27,6 @@ __all__ = [
     "JwtResponseSchema",
     "ErrorResponseSchema",
     "WorkshopSchema",
+    "JobSchema",
+    "ProductSchema",
 ]

@@ -23,7 +23,7 @@ class UserRegisterSchema(Schema):
     )
     role = fields.Str(
         missing="USER",
-        validate=validate.OneOf(["USER", "TRAINER", "ADMIN"]),
+        validate=validate.OneOf(["USER", "TRAINER", "RECRUITER", "SELLER", "ADMIN"]),
         error_messages={"invalid": "Invalid role"}
     )
 
@@ -99,6 +99,47 @@ class WorkshopSchema(Schema):
         validate=validate.OneOf(["Pottery", "Embroidery", "Weaving", "Painting", "Other"])
     )
     max_participants = fields.Int(missing=20, validate=validate.Range(min=1, max=100))
+    status = fields.Str(
+        missing="PENDING",
+        validate=validate.OneOf(["PENDING", "APPROVED", "REJECTED"])
+    )
+    created_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)
+
+
+class JobSchema(Schema):
+    """Schema for job data."""
+    id = fields.Int(dump_only=True)
+    recruiter_id = fields.Int()
+    title = fields.Str(required=True, validate=validate.Length(min=3, max=255))
+    description = fields.Str()
+    location = fields.Str()
+    salary_range = fields.Str()
+    job_category = fields.Str(
+        required=True,
+        validate=validate.OneOf(["Artisan", "Crafts", "Retail", "Teaching", "Other"])
+    )
+    status = fields.Str(
+        missing="PENDING",
+        validate=validate.OneOf(["PENDING", "APPROVED", "REJECTED"])
+    )
+    created_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)
+
+
+class ProductSchema(Schema):
+    """Schema for product data."""
+    id = fields.Int(dump_only=True)
+    seller_id = fields.Int()
+    title = fields.Str(required=True, validate=validate.Length(min=3, max=255))
+    description = fields.Str()
+    price = fields.Float(required=True, validate=validate.Range(min=0))
+    category = fields.Str(
+        required=True,
+        validate=validate.OneOf(["Pottery", "Textiles", "Jewelry", "Painting", "Other"])
+    )
+    image_url = fields.Str()
+    stock_quantity = fields.Int(missing=1, validate=validate.Range(min=0))
     status = fields.Str(
         missing="PENDING",
         validate=validate.OneOf(["PENDING", "APPROVED", "REJECTED"])

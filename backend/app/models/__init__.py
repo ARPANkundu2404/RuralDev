@@ -9,6 +9,8 @@ from app.models.user_model import (
     BlacklistedToken,
     RoleEnum,
     Workshop,
+    Job,
+    Product,
 )
 
 __all__ = [
@@ -17,4 +19,6 @@ __all__ = [
     "BlacklistedToken",
     "RoleEnum",
     "Workshop",
+    "Job",
+    "Product",
 ]

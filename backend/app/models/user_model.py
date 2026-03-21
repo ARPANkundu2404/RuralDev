@@ -13,6 +13,8 @@ class RoleEnum(str, Enum):
     """Role enumeration for RBAC."""
     USER = "USER"
     TRAINER = "TRAINER"
+    RECRUITER = "RECRUITER"
+    SELLER = "SELLER"
     ADMIN = "ADMIN"
 
 
@@ -166,3 +168,79 @@ class Workshop(db.Model):
     
     def __repr__(self):
         return f"<Workshop {self.title} ({self.status})>"
+
+
+class Job(db.Model):
+    """Job model for recruiters to post job listings."""
+    __tablename__ = "jobs"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    recruiter_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text)
+    location = db.Column(db.String(255))
+    salary_range = db.Column(db.String(100))  # e.g., "50000-70000"
+    job_category = db.Column(db.String(100), nullable=False)  # e.g., Artisan, Crafts, Other
+    status = db.Column(db.String(20), default="PENDING")  # PENDING, APPROVED, REJECTED
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    recruiter = db.relationship("User", backref="jobs")
+    
+    def to_dict(self):
+        """Convert to dictionary."""
+        return {
+            "id": self.id,
+            "recruiter_id": self.recruiter_id,
+            "title": self.title,
+            "description": self.description,
+            "location": self.location,
+            "salary_range": self.salary_range,
+            "job_category": self.job_category,
+            "status": self.status,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }
+    
+    def __repr__(self):
+        return f"<Job {self.title} ({self.status})>"
+
+
+class Product(db.Model):
+    """Product model for sellers to list artisan products."""
+    __tablename__ = "products"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    seller_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text)
+    price = db.Column(db.Float, nullable=False)
+    category = db.Column(db.String(100), nullable=False)  # Pottery, Textiles, Jewelry, etc.
+    image_url = db.Column(db.String(500))
+    stock_quantity = db.Column(db.Integer, default=1)
+    status = db.Column(db.String(20), default="PENDING")  # PENDING, APPROVED, REJECTED
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    seller = db.relationship("User", backref="products")
+    
+    def to_dict(self):
+        """Convert to dictionary."""
+        return {
+            "id": self.id,
+            "seller_id": self.seller_id,
+            "title": self.title,
+            "description": self.description,
+            "price": self.price,
+            "category": self.category,
+            "image_url": self.image_url,
+            "stock_quantity": self.stock_quantity,
+            "status": self.status,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }
+    
+    def __repr__(self):
+        return f"<Product {self.title} ({self.status})>"

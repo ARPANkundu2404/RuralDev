@@ -17,8 +17,31 @@ export default defineConfig({
         target: "http://localhost:5000",
         changeOrigin: true,
         secure: false,
-        // Optionally rewrite path if backend doesn't use /api prefix:
-        // rewrite: (path) => path.replace(/^\/api/, ""),
+        ws: true,
+        // Don't proxy external resource requests
+        bypass: (req, res, options) => {
+          // Allow fonts.gstatic.com requests to pass through
+          if (req.url.includes("fonts.gstatic.com")) {
+            return req.url;
+          }
+          // Allow regular font imports to load directly
+          if (req.url.includes(".woff") || req.url.includes(".woff2")) {
+            return req.url;
+          }
+        },
+      },
+      // Fallback: Allow external resources to load directly
+      "^(?!/api)": {
+        bypass: (req) => {
+          // Let external resources like fonts load directly
+          if (
+            req.url.includes("fonts.gstatic.com") ||
+            req.url.includes(".woff") ||
+            req.url.includes(".woff2")
+          ) {
+            return req.url;
+          }
+        },
       },
     },
   },

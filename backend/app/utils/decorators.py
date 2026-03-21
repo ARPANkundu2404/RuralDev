@@ -75,6 +75,6 @@ def trainer_or_admin_required(fn):
 def user_or_higher_required(fn):
     """
     Convenience decorator allowing any authenticated user.
-    All roles (USER, TRAINER, ADMIN) are allowed.
+    All roles (USER, TRAINER, RECRUITER, SELLER, ADMIN) are allowed.
     """
-    return role_required('USER', 'TRAINER', 'ADMIN')(fn)
+    return role_required('USER', 'TRAINER', 'RECRUITER', 'SELLER', 'ADMIN')(fn)

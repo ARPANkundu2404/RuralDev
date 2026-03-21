@@ -1,6 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Briefcase, BookOpen, ShoppingBag, MapPin, Clock, Star, ArrowRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Briefcase,
+  BookOpen,
+  ShoppingBag,
+  MapPin,
+  Clock,
+  Star,
+  ArrowRight,
+} from "lucide-react";
 import { workshopAPI, jobsAPI, marketplaceAPI } from "../../utils/api";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -58,7 +68,8 @@ const HeroCarousel = () => {
   };
 
   const next = () => goTo((current + 1) % CAROUSEL_SLIDES.length, 1);
-  const prev = () => goTo((current - 1 + CAROUSEL_SLIDES.length) % CAROUSEL_SLIDES.length, -1);
+  const prev = () =>
+    goTo((current - 1 + CAROUSEL_SLIDES.length) % CAROUSEL_SLIDES.length, -1);
 
   useEffect(() => {
     timerRef.current = setInterval(next, 5500);
@@ -90,7 +101,10 @@ const HeroCarousel = () => {
             src={slide.url}
             alt={slide.title}
             className="w-full h-full object-cover"
-            onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200"; }}
+            onError={(e) => {
+              e.target.src =
+                "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200";
+            }}
           />
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
@@ -103,12 +117,16 @@ const HeroCarousel = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.5 }}
             >
-              <span className="inline-block mb-3 px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase"
-                    style={{ background: "#C05746", color: "#fff" }}>
+              <span
+                className="inline-block mb-3 px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase"
+                style={{ background: "#C05746", color: "#fff" }}
+              >
                 RuralDev
               </span>
-              <h1 className="text-3xl md:text-5xl font-bold text-white mb-3 leading-tight"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+              <h1
+                className="text-3xl md:text-5xl font-bold text-white mb-3 leading-tight"
+                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+              >
                 {slide.title}
               </h1>
               <p className="text-white/85 text-lg mb-6">{slide.subtitle}</p>
@@ -129,9 +147,15 @@ const HeroCarousel = () => {
         { icon: ChevronLeft, fn: prev, pos: "left-4" },
         { icon: ChevronRight, fn: next, pos: "right-4" },
       ].map(({ icon: Icon, fn, pos }) => (
-        <button key={pos} onClick={fn}
+        <button
+          key={pos}
+          onClick={fn}
           className={`absolute ${pos} top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center backdrop-blur-sm transition-all hover:scale-110`}
-          style={{ background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.3)" }}>
+          style={{
+            background: "rgba(255,255,255,0.18)",
+            border: "1px solid rgba(255,255,255,0.3)",
+          }}
+        >
           <Icon size={22} color="#fff" />
         </button>
       ))}
@@ -139,9 +163,14 @@ const HeroCarousel = () => {
       {/* Dots */}
       <div className="absolute bottom-5 right-8 flex gap-2">
         {CAROUSEL_SLIDES.map((_, i) => (
-          <button key={i} onClick={() => goTo(i, i > current ? 1 : -1)}
+          <button
+            key={i}
+            onClick={() => goTo(i, i > current ? 1 : -1)}
             className="h-1.5 rounded-full transition-all duration-300"
-            style={{ width: i === current ? 28 : 8, background: i === current ? "#C05746" : "rgba(255,255,255,0.5)" }}
+            style={{
+              width: i === current ? 28 : 8,
+              background: i === current ? "#C05746" : "rgba(255,255,255,0.5)",
+            }}
           />
         ))}
       </div>
@@ -153,19 +182,34 @@ const HeroCarousel = () => {
 const SectionHeader = ({ icon: Icon, title, accent, seeAllLink }) => (
   <div className="flex items-center justify-between mb-6">
     <div className="flex items-center gap-3">
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-           style={{ background: "#2D5A27" }}>
+      <div
+        className="w-10 h-10 rounded-xl flex items-center justify-center"
+        style={{ background: "#2D5A27" }}
+      >
         <Icon size={20} color="#F9F6F0" />
       </div>
       <div>
-        <h2 className="text-2xl font-bold" style={{ color: "#1a2e18", fontFamily: "'Playfair Display', Georgia, serif" }}>
+        <h2
+          className="text-2xl font-bold"
+          style={{
+            color: "#1a2e18",
+            fontFamily: "'Playfair Display', Georgia, serif",
+          }}
+        >
           {title}
         </h2>
-        <div className="h-0.5 w-16 rounded-full mt-1" style={{ background: "#C05746" }} />
+        <div
+          className="h-0.5 w-16 rounded-full mt-1"
+          style={{ background: "#C05746" }}
+        />
       </div>
     </div>
     {seeAllLink && (
-      <a href={seeAllLink} className="flex items-center gap-1 text-sm font-medium hover:underline" style={{ color: "#2D5A27" }}>
+      <a
+        href={seeAllLink}
+        className="flex items-center gap-1 text-sm font-medium hover:underline"
+        style={{ color: "#2D5A27" }}
+      >
         See all <ArrowRight size={14} />
       </a>
     )}
@@ -174,30 +218,48 @@ const SectionHeader = ({ icon: Icon, title, accent, seeAllLink }) => (
 
 // ─── Workshop Card ─────────────────────────────────────────────────────────────
 const WorkshopCard = ({ workshop }) => (
-  <motion.div whileHover={{ y: -4 }} className="rounded-2xl overflow-hidden shadow-md flex-shrink-0 w-72"
-    style={{ background: "#fff", border: "1px solid #e8e0d5" }}>
+  <motion.div
+    whileHover={{ y: -4 }}
+    className="rounded-2xl overflow-hidden shadow-md flex-shrink-0 w-72"
+    style={{ background: "#fff", border: "1px solid #e8e0d5" }}
+  >
     <div className="h-40 relative overflow-hidden">
-      <img src={workshop.thumbnailUrl || "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400"}
-           alt={workshop.title} className="w-full h-full object-cover" />
+      <img
+        src={
+          workshop.thumbnailUrl ||
+          "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400"
+        }
+        alt={workshop.title}
+        className="w-full h-full object-cover"
+      />
       <div className="absolute top-3 right-3">
-        <span className="px-2 py-1 rounded-full text-xs font-bold text-white" style={{ background: "#2D5A27" }}>
+        <span
+          className="px-2 py-1 rounded-full text-xs font-bold text-white"
+          style={{ background: "#2D5A27" }}
+        >
           {workshop.category || "Craft"}
         </span>
       </div>
     </div>
     <div className="p-4">
-      <h3 className="font-semibold text-gray-800 mb-1 line-clamp-1">{workshop.title}</h3>
+      <h3 className="font-semibold text-gray-800 mb-1 line-clamp-1">
+        {workshop.title}
+      </h3>
       <div className="flex items-center gap-1 text-sm text-gray-500 mb-3">
-        <Clock size={13} /><span>{workshop.duration || "4 hrs"}</span>
+        <Clock size={13} />
+        <span>{workshop.duration || "4 hrs"}</span>
         <span className="mx-1">·</span>
-        <Star size={13} className="text-yellow-500" /><span>{workshop.rating || "4.8"}</span>
+        <Star size={13} className="text-yellow-500" />
+        <span>{workshop.rating || "4.8"}</span>
       </div>
       <div className="flex items-center justify-between">
         <span className="font-bold" style={{ color: "#C05746" }}>
           {workshop.price > 0 ? `₹${workshop.price}` : "Free"}
         </span>
-        <button className="px-3 py-1.5 rounded-full text-xs font-semibold text-white transition-all hover:opacity-90"
-                style={{ background: "#2D5A27" }}>
+        <button
+          className="px-3 py-1.5 rounded-full text-xs font-semibold text-white transition-all hover:opacity-90"
+          style={{ background: "#2D5A27" }}
+        >
           Enroll
         </button>
       </div>
@@ -207,29 +269,48 @@ const WorkshopCard = ({ workshop }) => (
 
 // ─── Job Card ──────────────────────────────────────────────────────────────────
 const JobCard = ({ job }) => (
-  <motion.div whileHover={{ y: -4 }} className="rounded-2xl p-5 shadow-md flex-shrink-0 w-72"
-    style={{ background: "#fff", border: "1px solid #e8e0d5" }}>
+  <motion.div
+    whileHover={{ y: -4 }}
+    className="rounded-2xl p-5 shadow-md flex-shrink-0 w-72"
+    style={{ background: "#fff", border: "1px solid #e8e0d5" }}
+  >
     <div className="flex items-center gap-3 mb-3">
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm"
-           style={{ background: "#C05746" }}>
+      <div
+        className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm"
+        style={{ background: "#C05746" }}
+      >
         {(job.company || "Co")[0]}
       </div>
       <div>
         <p className="font-semibold text-gray-800 text-sm">{job.title}</p>
-        <p className="text-xs text-gray-500">{job.company || "Local Business"}</p>
+        <p className="text-xs text-gray-500">
+          {job.company || "Local Business"}
+        </p>
       </div>
     </div>
     <div className="flex items-center gap-1 text-xs text-gray-500 mb-3">
-      <MapPin size={12} /><span>{job.location || "Remote"}</span>
+      <MapPin size={12} />
+      <span>{job.location || "Remote"}</span>
     </div>
     <div className="flex flex-wrap gap-1 mb-3">
       {(job.skills || ["Handicraft", "Weaving"]).slice(0, 3).map((s) => (
-        <span key={s} className="px-2 py-0.5 rounded-full text-xs" style={{ background: "#F0EBE3", color: "#5a4a3a" }}>{s}</span>
+        <span
+          key={s}
+          className="px-2 py-0.5 rounded-full text-xs"
+          style={{ background: "#F0EBE3", color: "#5a4a3a" }}
+        >
+          {s}
+        </span>
       ))}
     </div>
     <div className="flex items-center justify-between">
-      <span className="text-sm font-bold" style={{ color: "#2D5A27" }}>₹{job.salary || "8,000"}/mo</span>
-      <button className="px-3 py-1.5 rounded-full text-xs font-semibold text-white" style={{ background: "#2D5A27" }}>
+      <span className="text-sm font-bold" style={{ color: "#2D5A27" }}>
+        ₹{job.salary || "8,000"}/mo
+      </span>
+      <button
+        className="px-3 py-1.5 rounded-full text-xs font-semibold text-white"
+        style={{ background: "#2D5A27" }}
+      >
         Apply
       </button>
     </div>
@@ -238,19 +319,34 @@ const JobCard = ({ job }) => (
 
 // ─── Product Card ──────────────────────────────────────────────────────────────
 const ProductCard = ({ product }) => (
-  <motion.div whileHover={{ y: -4 }} className="rounded-2xl overflow-hidden shadow-md flex-shrink-0 w-64"
-    style={{ background: "#fff", border: "1px solid #e8e0d5" }}>
+  <motion.div
+    whileHover={{ y: -4 }}
+    className="rounded-2xl overflow-hidden shadow-md flex-shrink-0 w-64"
+    style={{ background: "#fff", border: "1px solid #e8e0d5" }}
+  >
     <div className="h-48 overflow-hidden">
-      <img src={product.imageUrl || "https://images.unsplash.com/photo-1594226801341-41427b4e5c22?w=400"}
-           alt={product.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+      <img
+        src={
+          product.imageUrl ||
+          "https://images.unsplash.com/photo-1594226801341-41427b4e5c22?w=400"
+        }
+        alt={product.name}
+        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+      />
     </div>
     <div className="p-4">
-      <h3 className="font-semibold text-gray-800 mb-1">{product.name || "Handwoven Basket"}</h3>
+      <h3 className="font-semibold text-gray-800 mb-1">
+        {product.name || "Handwoven Basket"}
+      </h3>
       <div className="flex items-center justify-between">
-        <span className="font-bold" style={{ color: "#C05746" }}>₹{product.price || "450"}</span>
+        <span className="font-bold" style={{ color: "#C05746" }}>
+          ₹{product.price || "450"}
+        </span>
         <div className="flex items-center gap-1">
           <Star size={12} className="text-yellow-500" />
-          <span className="text-xs text-gray-500">{product.rating || "4.9"}</span>
+          <span className="text-xs text-gray-500">
+            {product.rating || "4.9"}
+          </span>
         </div>
       </div>
     </div>
@@ -261,10 +357,15 @@ const ProductCard = ({ product }) => (
 const HScrollSection = ({ children, loading }) => (
   <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
     {loading
-      ? Array(4).fill(0).map((_, i) => (
-          <div key={i} className="flex-shrink-0 w-72 h-48 rounded-2xl animate-pulse"
-               style={{ background: "#e8e0d5" }} />
-        ))
+      ? Array(4)
+          .fill(0)
+          .map((_, i) => (
+            <div
+              key={i}
+              className="flex-shrink-0 w-72 h-48 rounded-2xl animate-pulse"
+              style={{ background: "#e8e0d5" }}
+            />
+          ))
       : children}
   </div>
 );
@@ -280,18 +381,24 @@ export default function HomePage() {
   const [loadingP, setLoadingP] = useState(true);
 
   useEffect(() => {
-    workshopAPI.getAll({ limit: 6, status: "PUBLISHED" })
-      .then(({ data }) => setWorkshops(data.workshops || []))
+    // Fetch APPROVED workshops only
+    workshopAPI
+      .getAll({ per_page: 6 })
+      .then(({ data }) => setWorkshops(data.data || []))
       .catch(() => setWorkshops(MOCK_WORKSHOPS))
       .finally(() => setLoadingW(false));
 
-    jobsAPI.getAll({ limit: 6 })
-      .then(({ data }) => setJobs(data.jobs || []))
+    // Fetch APPROVED jobs only
+    jobsAPI
+      .getAll({ per_page: 6 })
+      .then(({ data }) => setJobs(data.data || []))
       .catch(() => setJobs(MOCK_JOBS))
       .finally(() => setLoadingJ(false));
 
-    marketplaceAPI.getProducts({ limit: 6 })
-      .then(({ data }) => setProducts(data.products || []))
+    // Fetch APPROVED products only
+    marketplaceAPI
+      .getProducts({ per_page: 6 })
+      .then(({ data }) => setProducts(data.data || []))
       .catch(() => setProducts(MOCK_PRODUCTS))
       .finally(() => setLoadingP(false));
   }, []);
@@ -302,11 +409,22 @@ export default function HomePage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-14">
         {/* Welcome bar */}
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between"
+        >
           <div>
-            <p className="text-sm" style={{ color: "#6b7280" }}>Welcome back,</p>
-            <h1 className="text-2xl font-bold" style={{ color: "#1a2e18", fontFamily: "'Playfair Display', Georgia, serif" }}>
+            <p className="text-sm" style={{ color: "#6b7280" }}>
+              Welcome back,
+            </p>
+            <h1
+              className="text-2xl font-bold"
+              style={{
+                color: "#1a2e18",
+                fontFamily: "'Playfair Display', Georgia, serif",
+              }}
+            >
               {user?.username || user?.email?.split("@")[0] || "Artisan"} 👋
             </h1>
           </div>
@@ -314,31 +432,53 @@ export default function HomePage() {
         </motion.div>
 
         {/* Hero Carousel */}
-        <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
+        <motion.section
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+        >
           <HeroCarousel />
         </motion.section>
 
         {/* Workshops Section */}
         <section>
-          <SectionHeader icon={BookOpen} title="Upcoming Workshops" seeAllLink="/workshops" />
+          <SectionHeader
+            icon={BookOpen}
+            title="Upcoming Workshops"
+            seeAllLink="/workshops"
+          />
           <HScrollSection loading={loadingW}>
-            {workshops.map((w) => <WorkshopCard key={w._id || w.id} workshop={w} />)}
+            {workshops.map((w) => (
+              <WorkshopCard key={w._id || w.id} workshop={w} />
+            ))}
           </HScrollSection>
         </section>
 
         {/* Jobs Section */}
         <section>
-          <SectionHeader icon={Briefcase} title="Jobs Near You" seeAllLink="/jobs" />
+          <SectionHeader
+            icon={Briefcase}
+            title="Jobs Near You"
+            seeAllLink="/jobs"
+          />
           <HScrollSection loading={loadingJ}>
-            {jobs.map((j) => <JobCard key={j._id || j.id} job={j} />)}
+            {jobs.map((j) => (
+              <JobCard key={j._id || j.id} job={j} />
+            ))}
           </HScrollSection>
         </section>
 
         {/* Marketplace Section */}
         <section>
-          <SectionHeader icon={ShoppingBag} title="Marketplace" seeAllLink="/marketplace" />
+          <SectionHeader
+            icon={ShoppingBag}
+            title="Marketplace"
+            seeAllLink="/marketplace"
+          />
           <HScrollSection loading={loadingP}>
-            {products.map((p) => <ProductCard key={p._id || p.id} product={p} />)}
+            {products.map((p) => (
+              <ProductCard key={p._id || p.id} product={p} />
+            ))}
           </HScrollSection>
         </section>
       </main>
@@ -350,16 +490,65 @@ export default function HomePage() {
 
 // ─── Mock Data (fallback when API is unavailable) ──────────────────────────────
 const MOCK_WORKSHOPS = [
-  { id: 1, title: "Madhubani Painting Basics", duration: "6 hrs", price: 0, rating: "4.9", category: "Art" },
-  { id: 2, title: "Bamboo Craft Mastery", duration: "8 hrs", price: 299, rating: "4.7", category: "Craft" },
-  { id: 3, title: "Natural Dye Techniques", duration: "4 hrs", price: 149, rating: "4.8", category: "Textile" },
-  { id: 4, title: "Pottery for Beginners", duration: "10 hrs", price: 499, rating: "4.6", category: "Pottery" },
+  {
+    id: 1,
+    title: "Madhubani Painting Basics",
+    duration: "6 hrs",
+    price: 0,
+    rating: "4.9",
+    category: "Art",
+  },
+  {
+    id: 2,
+    title: "Bamboo Craft Mastery",
+    duration: "8 hrs",
+    price: 299,
+    rating: "4.7",
+    category: "Craft",
+  },
+  {
+    id: 3,
+    title: "Natural Dye Techniques",
+    duration: "4 hrs",
+    price: 149,
+    rating: "4.8",
+    category: "Textile",
+  },
+  {
+    id: 4,
+    title: "Pottery for Beginners",
+    duration: "10 hrs",
+    price: 499,
+    rating: "4.6",
+    category: "Pottery",
+  },
 ];
 
 const MOCK_JOBS = [
-  { id: 1, title: "Embroidery Specialist", company: "Fabindia", location: "Jaipur", salary: "12,000", skills: ["Embroidery", "Design"] },
-  { id: 2, title: "Weaver (Handloom)", company: "Khadi India", location: "Varanasi", salary: "9,500", skills: ["Weaving", "Handloom"] },
-  { id: 3, title: "Wood Carver", company: "CraftVillage", location: "Saharanpur", salary: "11,000", skills: ["Wood Carving"] },
+  {
+    id: 1,
+    title: "Embroidery Specialist",
+    company: "Fabindia",
+    location: "Jaipur",
+    salary: "12,000",
+    skills: ["Embroidery", "Design"],
+  },
+  {
+    id: 2,
+    title: "Weaver (Handloom)",
+    company: "Khadi India",
+    location: "Varanasi",
+    salary: "9,500",
+    skills: ["Weaving", "Handloom"],
+  },
+  {
+    id: 3,
+    title: "Wood Carver",
+    company: "CraftVillage",
+    location: "Saharanpur",
+    salary: "11,000",
+    skills: ["Wood Carving"],
+  },
 ];
 
 const MOCK_PRODUCTS = [
