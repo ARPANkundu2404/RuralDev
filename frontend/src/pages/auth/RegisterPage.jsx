@@ -63,6 +63,10 @@ const StepCredentials = ({ data, setData, errors, onNext }) => {
       <p className="text-sm text-gray-500 mb-6">Join the RuralDev ecosystem</p>
 
       <div className="space-y-4">
+        <Field icon={User} label="Username" type="text" placeholder="your_username"
+          value={data.username || ""} onChange={(e) => setData({ ...data, username: e.target.value })}
+          error={errors.username} />
+        
         <Field icon={Mail} label="Email Address" type="email" placeholder="you@example.com"
           value={data.email} onChange={(e) => setData({ ...data, email: e.target.value })}
           error={errors.email} />
@@ -130,6 +134,10 @@ const StepConfirm = ({ data, onBack, onSubmit, loading, error }) => (
 
     <div className="rounded-xl p-4 mb-6 space-y-3" style={{ background: "#f0ebe3", border: "1px solid #e0d8ce" }}>
       <div className="flex justify-between text-sm">
+        <span className="text-gray-500">Username</span>
+        <span className="font-medium text-gray-800">{data.username}</span>
+      </div>
+      <div className="flex justify-between text-sm">
         <span className="text-gray-500">Email</span>
         <span className="font-medium text-gray-800">{data.email}</span>
       </div>
@@ -172,11 +180,12 @@ const StepConfirm = ({ data, onBack, onSubmit, loading, error }) => (
 export default function RegisterPage() {
   const { register, loading, error, setError } = useAuth();
   const [step, setStep] = useState(0);
-  const [data, setData] = useState({ email: "", password: "", role: ROLES.USER });
+  const [data, setData] = useState({ username: "", email: "", password: "", role: ROLES.USER });
   const [errors, setErrors] = useState({});
 
   const validate = () => {
     const e = {};
+    if (!data.username || data.username.length < 3) e.username = "Username must be at least 3 characters.";
     if (!data.email || !/\S+@\S+\.\S+/.test(data.email)) e.email = "Valid email required.";
     if (!data.password || data.password.length < 8) e.password = "Password must be at least 8 characters.";
     if (!data.role) e.role = "Please select a role.";

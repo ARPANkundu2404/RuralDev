@@ -17,7 +17,7 @@ class AuthService:
     @staticmethod
     def register_user(username, email, password, role="USER"):
         """
-        Register a new user.
+        Register a new user (Direct Login - No OTP verification).
         
         Args:
             username: Username
@@ -41,24 +41,25 @@ class AuthService:
             return False, None, f"Invalid role. Must be one of: {', '.join([r.value for r in RoleEnum])}"
         
         try:
-            # Create new user
+            # Create new user (verified by default for direct login)
             user = User(
                 username=username,
                 email=email,
                 role=role,
                 is_active=True,
-                is_verified=False
+                is_verified=True
             )
             user.set_password(password)
             
             db.session.add(user)
             db.session.commit()
             
-            # Send OTP for email verification
-            otp = EmailService.create_otp(user, email, purpose="email_verification")
-            EmailService.send_otp_email(email, otp.otp_code, purpose="email_verification")
+            # Send welcome email with login link
+            from app.services.email_service import EmailService
+            login_url = current_app.config.get("FRONTEND_URL", "http://localhost:5173") + "/login"
+            EmailService.send_welcome_email(email, login_url)
             
-            return True, user, "User registered successfully. Check email for OTP."
+            return True, user, "Registration successful. Check your email."
         
         except Exception as e:
             db.session.rollback()
@@ -68,14 +69,14 @@ class AuthService:
     @staticmethod
     def login_user(email, password):
         """
-        Authenticate user and generate JWT tokens.
+        Authenticate user and generate JWT token (Direct Login - Simplified).
         
         Args:
             email: Email address
             password: Plain text password
         
         Returns:
-            Tuple (success: bool, tokens: dict or None, user: User or None, message: str)
+            Tuple (success: bool, user: User or None, token: str or None, message: str)
         """
         # Find user by email
         user = User.query.filter_by(email=email).first()
@@ -90,12 +91,8 @@ class AuthService:
         if not user.check_password(password):
             return False, None, None, "Invalid email or password"
         
-        # Check if email is verified
-        if not user.is_verified:
-            return False, None, user, "Email not verified. Please verify your email."
-        
         try:
-            # Create JWT tokens
+            # Create JWT token
             access_token = create_access_token(
                 identity=user.id,
                 additional_claims={
@@ -104,16 +101,8 @@ class AuthService:
                     "email": user.email
                 }
             )
-            refresh_token = create_refresh_token(identity=user.id)
             
-            tokens = {
-                "access_token": access_token,
-                "refresh_token": refresh_token,
-                "token_type": "Bearer",
-                "expires_in": current_app.config["JWT_ACCESS_TOKEN_EXPIRES"].total_seconds()
-            }
-            
-            return True, tokens, user, "Login successful"
+            return True, user, access_token, "Login successful"
         
         except Exception as e:
             current_app.logger.error(f"Login error: {str(e)}")
@@ -176,67 +165,4 @@ class AuthService:
             return True
         
         return False
-    
-    @staticmethod
-    def verify_email(email, otp_code):
-        """
-        Verify user email with OTP.
-        
-        Args:
-            email: Email address
-            otp_code: OTP code
-        
-        Returns:
-            Tuple (success: bool, user: User or None, message: str)
-        """
-        # Verify OTP
-        success, message, otp = EmailService.verify_otp(email, otp_code)
-        
-        if not success:
-            if otp:
-                EmailService.increment_otp_attempts(email, otp_code)
-            return False, None, message
-        
-        # Find and update user
-        user = User.query.filter_by(email=email).first()
-        
-        if not user:
-            return False, None, "User not found"
-        
-        try:
-            user.is_verified = True
-            db.session.commit()
-            return True, user, "Email verified successfully"
-        
-        except Exception as e:
-            db.session.rollback()
-            current_app.logger.error(f"Email verification error: {str(e)}")
-            return False, None, "Verification failed"
-    
-    @staticmethod
-    def resend_otp(email):
-        """
-        Resend OTP to email.
-        
-        Args:
-            email: Email address
-        
-        Returns:
-            Tuple (success: bool, message: str)
-        """
-        user = User.query.filter_by(email=email).first()
-        
-        if not user:
-            return False, "User not found"
-        
-        if user.is_verified:
-            return False, "Email already verified"
-        
-        try:
-            otp = EmailService.create_otp(user, email, purpose="email_verification")
-            EmailService.send_otp_email(email, otp.otp_code, purpose="email_verification")
-            return True, "OTP sent successfully"
-        
-        except Exception as e:
-            current_app.logger.error(f"Resend OTP error: {str(e)}")
-            return False, "Failed to resend OTP"
+

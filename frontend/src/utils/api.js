@@ -107,8 +107,7 @@ api.interceptors.response.use(
 export const authAPI = {
   login: (credentials) => api.post("/auth/login", credentials),
   register: (userData) => api.post("/auth/register", userData),
-  verifyEmail: (payload) => api.post("/auth/verify-email", payload),
-  resendOTP: (email) => api.post("/auth/resend-otp", { email }),
+  dashboard: () => api.get("/auth/dashboard"),
   refresh: (refreshToken) => api.post("/auth/refresh", { refreshToken }),
   logout: () => api.post("/auth/logout"),
 };

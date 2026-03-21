@@ -30,19 +30,6 @@ export default defineConfig({
           }
         },
       },
-      // Fallback: Allow external resources to load directly
-      "^(?!/api)": {
-        bypass: (req) => {
-          // Let external resources like fonts load directly
-          if (
-            req.url.includes("fonts.gstatic.com") ||
-            req.url.includes(".woff") ||
-            req.url.includes(".woff2")
-          ) {
-            return req.url;
-          }
-        },
-      },
     },
   },
   resolve: {

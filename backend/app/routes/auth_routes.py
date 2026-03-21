@@ -7,8 +7,8 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity
 from marshmallow import ValidationError
 from app.schemas import (
-    UserRegisterSchema, UserLoginSchema, OtpVerifySchema,
-    OtpRequestSchema, JwtResponseSchema, UserResponseSchema
+    UserRegisterSchema, UserLoginSchema,
+    UserResponseSchema
 )
 from app.services.auth_service import AuthService
 from app.services.email_service import EmailService
@@ -21,7 +21,7 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 @auth_bp.route("/register", methods=["POST"])
 def register():
     """
-    Register a new user.
+    Register a new user (Direct Login - No OTP verification).
     
     Request body:
     {
@@ -31,11 +31,15 @@ def register():
         "role": "USER"  # Optional, defaults to USER
     }
     
-    Response:
+    Response (201):
     {
-        "success": true,
-        "message": "User registered successfully...",
-        "user": {...}
+        "status": 201,
+        "message": "Registration successful. Check your email.",
+        "data": {
+            "token": "...",
+            "email": "john@example.com",
+            "role": "USER"
+        }
     }
     """
     schema = UserRegisterSchema()
@@ -44,10 +48,9 @@ def register():
         data = schema.load(request.get_json())
     except ValidationError as err:
         return jsonify({
-            "success": False,
-            "error": "Validation Error",
-            "message": err.messages,
-            "status_code": 400
+            "status": 400,
+            "message": "Validation Error",
+            "error": err.messages
         }), 400
     
     # Register user
@@ -59,24 +62,38 @@ def register():
     )
     
     if not success:
+        status_code = 409 if "already exists" in message else 400
         return jsonify({
-            "success": False,
-            "error": "Registration Failed",
-            "message": message,
-            "status_code": 400
-        }), 400
+            "status": status_code,
+            "message": message
+        }), status_code
+    
+    # Generate JWT token for immediate login
+    from flask_jwt_extended import create_access_token
+    access_token = create_access_token(
+        identity=user.id,
+        additional_claims={
+            "role": user.role,
+            "username": user.username,
+            "email": user.email
+        }
+    )
     
     return jsonify({
-        "success": True,
-        "message": message,
-        "user": UserResponseSchema().dump(user)
+        "status": 201,
+        "message": "Registration successful. Check your email.",
+        "data": {
+            "token": access_token,
+            "email": user.email,
+            "role": user.role
+        }
     }), 201
 
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
     """
-    Login user and return JWT tokens.
+    Login user and return JWT token (Direct Login - Simplified).
     
     Request body:
     {
@@ -84,16 +101,14 @@ def login():
         "password": "secure_password123"
     }
     
-    Response:
+    Response (200):
     {
-        "success": true,
-        "message": "Login successful",
+        "status": 200,
+        "message": "Successfully logged in",
         "data": {
-            "access_token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
-            "refresh_token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
-            "token_type": "Bearer",
-            "expires_in": 3600,
-            "user": {...}
+            "token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+            "email": "john@example.com",
+            "role": "USER"
         }
     }
     """
@@ -103,131 +118,80 @@ def login():
         data = schema.load(request.get_json())
     except ValidationError as err:
         return jsonify({
-            "success": False,
-            "error": "Validation Error",
-            "message": err.messages,
-            "status_code": 400
+            "status": 400,
+            "message": "Validation Error",
+            "error": err.messages
         }), 400
     
     # Authenticate user
-    success, tokens, user, message = AuthService.login_user(
+    success, user, token, message = AuthService.login_user(
         email=data["email"],
         password=data["password"]
     )
     
     if not success:
-        status_code = 401 if user else 401
+        status_code = 401
         return jsonify({
-            "success": False,
-            "error": "Authentication Failed",
-            "message": message,
-            "status_code": status_code
+            "status": status_code,
+            "message": message
         }), status_code
     
     return jsonify({
-        "success": True,
-        "message": message,
+        "status": 200,
+        "message": "Successfully logged in",
         "data": {
-            **tokens,
-            "user": UserResponseSchema().dump(user)
+            "token": token,
+            "email": user.email,
+            "role": user.role
         }
     }), 200
 
 
-@auth_bp.route("/verify-email", methods=["POST"])
-def verify_email():
+@auth_bp.route("/dashboard", methods=["GET"])
+@jwt_required()
+@user_or_higher_required
+def dashboard():
     """
-    Verify user email with OTP.
+    Get user dashboard data (protected endpoint).
+    Accessible to: ADMIN, USER, TRAINER, RECRUITER, SELLER
     
-    Request body:
+    Headers:
     {
-        "email": "john@example.com",
-        "otp_code": "123456"
+        "Authorization": "Bearer <access_token>"
     }
     
-    Response:
+    Response (200):
     {
-        "success": true,
-        "message": "Email verified successfully",
-        "user": {...}
+        "status": 200,
+        "message": "Dashboard data retrieved",
+        "data": {
+            "user": {...},
+            "stats": {...}
+        }
     }
     """
-    schema = OtpVerifySchema()
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
     
-    try:
-        data = schema.load(request.get_json())
-    except ValidationError as err:
+    if not user:
         return jsonify({
-            "success": False,
-            "error": "Validation Error",
-            "message": err.messages,
-            "status_code": 400
-        }), 400
+            "status": 404,
+            "message": "User not found"
+        }), 404
     
-    # Verify email
-    success, user, message = AuthService.verify_email(
-        email=data["email"],
-        otp_code=data["otp_code"]
-    )
-    
-    if not success:
-        return jsonify({
-            "success": False,
-            "error": "Verification Failed",
-            "message": message,
-            "status_code": 400
-        }), 400
+    # Construct dashboard data
+    dashboard_data = {
+        "user": UserResponseSchema().dump(user),
+        "stats": {
+            "accountCreated": user.created_at.isoformat(),
+            "lastUpdated": user.updated_at.isoformat()
+        }
+    }
     
     return jsonify({
-        "success": True,
-        "message": message,
-        "user": UserResponseSchema().dump(user)
-    }), 200
-
-
-@auth_bp.route("/resend-otp", methods=["POST"])
-def resend_otp():
-    """
-    Resend OTP to email.
-    
-    Request body:
-    {
-        "email": "john@example.com",
-        "purpose": "email_verification"  # Optional
-    }
-    
-    Response:
-    {
-        "success": true,
-        "message": "OTP sent successfully"
-    }
-    """
-    schema = OtpRequestSchema()
-    
-    try:
-        data = schema.load(request.get_json())
-    except ValidationError as err:
-        return jsonify({
-            "success": False,
-            "error": "Validation Error",
-            "message": err.messages,
-            "status_code": 400
-        }), 400
-    
-    # Resend OTP
-    success, message = AuthService.resend_otp(email=data["email"])
-    
-    if not success:
-        return jsonify({
-            "success": False,
-            "error": "Request Failed",
-            "message": message,
-            "status_code": 400
-        }), 400
-    
-    return jsonify({
-        "success": True,
-        "message": message
+        "status": 200,
+        "message": "Dashboard data retrieved",
+        "data": dashboard_data
     }), 200
 
 

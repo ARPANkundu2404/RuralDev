@@ -1,15 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, Leaf } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 export default function LoginPage() {
   const { login, loading, error, setError } = useAuth();
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState("");
+
+  useEffect(() => {
+    if (location.state?.successMessage) {
+      setSuccessMessage(location.state.successMessage);
+      const timer = setTimeout(() => setSuccessMessage(""), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]);
 
   const validate = () => {
     const e = {};
@@ -60,6 +70,16 @@ export default function LoginPage() {
               Sign In
             </h2>
             <p className="text-sm text-gray-500 mb-6">Welcome back to your RuralDev account.</p>
+
+            {successMessage && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-4 px-4 py-3 rounded-xl text-sm" 
+                style={{ background: "#d4edda", color: "#155724", border: "1px solid #c3e6cb" }}>
+                {successMessage}
+              </motion.div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email */}

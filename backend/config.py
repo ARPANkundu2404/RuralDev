@@ -40,6 +40,9 @@ class Config:
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
     
+    # Frontend URL for email links
+    FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    
     # Email configuration
     MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
     MAIL_PORT = int(os.getenv("MAIL_PORT", 587))
@@ -47,10 +50,6 @@ class Config:
     MAIL_USERNAME = os.getenv("MAIL_USERNAME")
     MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
     MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "noreply@ruraldev.com")
-    
-    # OTP configuration
-    OTP_EXPIRY_MINUTES = 15
-    MAX_OTP_ATTEMPTS = 5
 
 
 class DevelopmentConfig(Config):

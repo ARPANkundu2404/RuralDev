@@ -68,7 +68,6 @@ export const AuthProvider = ({ children }) => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [verificationEmail, setVerificationEmail] = useState(null);
 
   // Sync role whenever user changes
   useEffect(() => {
@@ -81,14 +80,22 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       try {
-        const { data } = await authAPI.login({ email, password });
+        const response = await authAPI.login({ email, password });
+        const { data } = response;
 
-        const { accessToken, refreshToken, user: userData } = data;
+        const { token, email: userEmail, role } = data;
+        
+        // Create user object from response
+        const userData = {
+          email: userEmail,
+          role: role,
+          // Additional fields can be fetched from dashboard if needed
+        };
 
-        persistAuth(accessToken, refreshToken, userData);
-        setToken(accessToken);
+        persistAuth(token, null, userData);
+        setToken(token);
         setUser(userData);
-        setRole(userData.role);
+        setRole(role);
 
         // Role-based redirect
         const redirectMap = {
@@ -98,7 +105,7 @@ export const AuthProvider = ({ children }) => {
           [ROLES.SELLER]: "/seller/products",
           [ROLES.USER]: "/home",
         };
-        navigate(redirectMap[userData.role] ?? "/home", { replace: true });
+        navigate(redirectMap[role] ?? "/home", { replace: true });
 
         return { success: true };
       } catch (err) {
@@ -114,28 +121,25 @@ export const AuthProvider = ({ children }) => {
 
   // ── Register ───────────────────────────────────────────────────────────────
   const register = useCallback(
-    async ({ email, password, role: selectedRole }) => {
+    async ({ email, password, username, role: selectedRole }) => {
       setLoading(true);
       setError(null);
       try {
-        const { data } = await authAPI.register({
+        const response = await authAPI.register({
+          username: username || email.split("@")[0],
           email,
           password,
           role: selectedRole,
         });
 
-        // Store temp data for OTP step
-        setVerificationEmail(email);
+        const { data } = response;
 
-        // If server returns a token (some flows auto-login after register)
-        if (data.accessToken) {
-          persistAuth(data.accessToken, data.refreshToken, data.user);
-          setToken(data.accessToken);
-          setUser(data.user);
-          setRole(data.user.role);
-        }
-
-        navigate("/verify-email", { state: { email } });
+        // Redirect to login page with success message
+        navigate("/login", { 
+          state: { 
+            successMessage: "Registration successful! Check your email, then sign in." 
+          } 
+        });
         return { success: true };
       } catch (err) {
         const msg =
@@ -149,52 +153,7 @@ export const AuthProvider = ({ children }) => {
     [navigate],
   );
 
-  // ── Verify Email (OTP) ─────────────────────────────────────────────────────
-  const verifyEmail = useCallback(
-    async (email, otp) => {
-      setLoading(true);
-      setError(null);
-      try {
-        const { data } = await authAPI.verifyEmail({ email, otp });
 
-        if (data.accessToken) {
-          persistAuth(data.accessToken, data.refreshToken, data.user);
-          setToken(data.accessToken);
-          setUser(data.user);
-          setRole(data.user.role);
-        }
-
-        // Post-verification → profile setup
-        navigate("/profile-setup", { state: { userId: data.user?.id } });
-        return { success: true };
-      } catch (err) {
-        const msg = err.friendlyMessage || "OTP verification failed.";
-        setError(msg);
-        return { success: false, message: msg };
-      } finally {
-        setLoading(false);
-      }
-    },
-    [navigate],
-  );
-
-  const resendOTP = useCallback(
-    async (email) => {
-      setLoading(true);
-      setError(null);
-      try {
-        await authAPI.resendOTP(email || verificationEmail);
-        return { success: true };
-      } catch (err) {
-        const msg = err.friendlyMessage || "Failed to resend OTP.";
-        setError(msg);
-        return { success: false, message: msg };
-      } finally {
-        setLoading(false);
-      }
-    },
-    [verificationEmail],
-  );
 
   // ── Complete Profile ───────────────────────────────────────────────────────
   const completeProfile = useCallback(
@@ -270,7 +229,6 @@ export const AuthProvider = ({ children }) => {
     role,
     loading,
     error,
-    verificationEmail,
     isAuthenticated,
 
     // Role flags
@@ -284,8 +242,6 @@ export const AuthProvider = ({ children }) => {
     // Actions
     login,
     register,
-    verifyEmail,
-    resendOTP,
     completeProfile,
     logout,
     updateUser,

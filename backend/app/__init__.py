@@ -13,6 +13,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from flask_migrate import Migrate
+from flask_mail import Mail
 
 # Configure logging
 logging.basicConfig(
@@ -24,6 +25,7 @@ logger = logging.getLogger(__name__)
 db = SQLAlchemy()
 jwt = JWTManager()
 migrate = Migrate()
+mail = Mail()
 
 
 def create_app(config_name="development"):
@@ -56,6 +58,11 @@ def create_app(config_name="development"):
     db.init_app(app)
     jwt.init_app(app)
     migrate.init_app(app, db)
+    mail.init_app(app)
+    
+    # Initialize EmailService with mail
+    from app.services.email_service import EmailService
+    EmailService.init_mail(app)
     
     # Configure CORS for development and production
     if app.config.get("DEBUG"):
