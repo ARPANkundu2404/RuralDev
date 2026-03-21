@@ -187,6 +187,18 @@ def update_user(user_id):
     if "password" in data:
         user.set_password(data["password"])
     
+    if "bio" in data:
+        user.bio = data["bio"]
+    
+    if "skills" in data:
+        user.skills = data["skills"]
+    
+    if "location" in data:
+        user.location = data["location"]
+    
+    if "is_profile_complete" in data:
+        user.is_profile_complete = data["is_profile_complete"]
+    
     db.session.commit()
     
     return jsonify({

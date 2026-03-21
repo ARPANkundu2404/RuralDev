@@ -83,29 +83,26 @@ export const AuthProvider = ({ children }) => {
         const response = await authAPI.login({ email, password });
         const { data } = response;
 
-        const { token, email: userEmail, role } = data;
+        const { token, user } = data;
         
-        // Create user object from response
-        const userData = {
-          email: userEmail,
-          role: role,
-          // Additional fields can be fetched from dashboard if needed
-        };
-
-        persistAuth(token, null, userData);
+        persistAuth(token, null, user);
         setToken(token);
-        setUser(userData);
-        setRole(role);
+        setUser(user);
+        setRole(user.role);
 
         // Role-based redirect
-        const redirectMap = {
-          [ROLES.ADMIN]: "/admin/approvals",
-          [ROLES.TRAINER]: "/trainer/workshops",
-          [ROLES.RECRUITER]: "/recruiter/jobs",
-          [ROLES.SELLER]: "/seller/products",
-          [ROLES.USER]: "/home",
-        };
-        navigate(redirectMap[role] ?? "/home", { replace: true });
+        if (user.role === ROLES.USER && !user.is_profile_complete) {
+          navigate("/profile-setup", { replace: true });
+        } else {
+          const redirectMap = {
+            [ROLES.ADMIN]: "/admin/approvals",
+            [ROLES.TRAINER]: "/trainer/workshops",
+            [ROLES.RECRUITER]: "/recruiter/jobs",
+            [ROLES.SELLER]: "/seller/products",
+            [ROLES.USER]: "/home",
+          };
+          navigate(redirectMap[user.role] ?? "/home", { replace: true });
+        }
 
         return { success: true };
       } catch (err) {
@@ -158,6 +155,10 @@ export const AuthProvider = ({ children }) => {
   // ── Complete Profile ───────────────────────────────────────────────────────
   const completeProfile = useCallback(
     async (userId, profileData) => {
+      if (!userId) {
+        setError("User ID is required to complete profile.");
+        return { success: false, message: "User ID is required." };
+      }
       setLoading(true);
       setError(null);
       try {
