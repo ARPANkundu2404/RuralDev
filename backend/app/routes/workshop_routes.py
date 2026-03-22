@@ -43,20 +43,22 @@ def list_workshops():
     status = request.args.get("status")
     skill_category = request.args.get("skill_category")
     trainer_id = request.args.get("trainer_id", type=int)
-    
+
     query = Workshop.query
-    
-    # Non-admins only see approved workshops
-    if user_role != "ADMIN":
+
+    if user_role == "TRAINER" and trainer_id is None:
+        trainer_id = get_jwt_identity()
+
+    if trainer_id is not None:
+        query = query.filter_by(trainer_id=trainer_id)
+
+    if user_role != "ADMIN" and user_role != "TRAINER":
         query = query.filter_by(status="APPROVED")
     elif status:
         query = query.filter_by(status=status)
-    
+
     if skill_category:
         query = query.filter_by(skill_category=skill_category)
-    
-    if trainer_id is not None:
-        query = query.filter_by(trainer_id=trainer_id)
     
     paginated = query.paginate(page=page, per_page=per_page)
     
@@ -97,6 +99,8 @@ def create_workshop():
     try:
         data = schema.load(request.get_json())
     except ValidationError as err:
+        from flask import current_app
+        current_app.logger.warning("Workshop validation failed: %s", err.messages)
         return jsonify({
             "success": False,
             "error": "Validation Error",
@@ -105,7 +109,7 @@ def create_workshop():
         }), 400
     
     try:
-        workshop = Workshop(
+        workshop = Workshop,
             trainer_id=trainer_id,
             title=data["title"],
             description=data.get("description"),

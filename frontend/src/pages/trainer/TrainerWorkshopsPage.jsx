@@ -205,10 +205,16 @@ export default function TrainerWorkshopsPage() {
 
   const handleSave = async (formData) => {
     const normalized = {
-      ...formData,
+      title: formData.title,
+      description: formData.description,
       skill_category: formData.category,
       max_participants: Number(formData.maxEnrollment || formData.max_participants || 20),
+      trainer_id: user?.id,
     };
+
+    if (!normalized.skill_category) {
+      throw new Error("Skill category is required.");
+    }
 
     if (editing) {
       await workshopAPI.update(editing._id || editing.id, normalized);
