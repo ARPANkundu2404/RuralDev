@@ -83,15 +83,29 @@ export const AuthProvider = ({ children }) => {
         const response = await authAPI.login({ email, password });
         const { data } = response;
 
-        const { token, user } = data;
-        
-        persistAuth(token, null, user);
+        const payload = data?.data || {};
+        const token = payload?.token;
+        const user = payload?.user;
+
+        if (!token || !user) {
+          throw new Error("Invalid auth response structure.");
+        }
+
+        const normalizedUser = {
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          is_profile_complete: user.is_profile_complete ?? false,
+          ...user,
+        };
+
+        persistAuth(token, null, normalizedUser);
         setToken(token);
-        setUser(user);
-        setRole(user.role);
+        setUser(normalizedUser);
+        setRole(normalizedUser.role);
 
         // Role-based redirect
-        if (user.role === ROLES.USER && !user.is_profile_complete) {
+        if (normalizedUser.role === ROLES.USER && !normalizedUser.is_profile_complete) {
           navigate("/profile-setup", { replace: true });
         } else {
           const redirectMap = {
@@ -101,7 +115,7 @@ export const AuthProvider = ({ children }) => {
             [ROLES.SELLER]: "/seller/products",
             [ROLES.USER]: "/home",
           };
-          navigate(redirectMap[user.role] ?? "/home", { replace: true });
+          navigate(redirectMap[normalizedUser.role] ?? "/home", { replace: true });
         }
 
         return { success: true };

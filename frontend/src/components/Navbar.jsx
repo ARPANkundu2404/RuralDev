@@ -146,6 +146,21 @@ export default function Navbar() {
           {/* Right Side */}
           <div className="flex items-center gap-3">
             {isAuthenticated ? (
+            <div className="flex items-center gap-2">
+              {([ROLES.ADMIN, ROLES.TRAINER, ROLES.RECRUITER, ROLES.SELLER].includes(role)) && (
+                <Link to={
+                  role === ROLES.ADMIN ? "/admin/approvals" :
+                  role === ROLES.TRAINER ? "/trainer/workshops" :
+                  role === ROLES.RECRUITER ? "/recruiter/jobs" :
+                  role === ROLES.SELLER ? "/seller/products" :
+                  "/home"
+                }
+                  className="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#2D5A27] text-white text-sm font-semibold hover:bg-[#25461f] transition-colors"
+                >
+                  Dashboard
+                </Link>
+              )}
+
               <div className="relative" ref={dropdownRef}>
                 <button onClick={() => setDropdownOpen(!dropdownOpen)}
                   className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all hover:bg-gray-100">
