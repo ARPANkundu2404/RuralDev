@@ -7,6 +7,19 @@ import {
 } from "lucide-react";
 import { useAuth, ROLES } from "../context/AuthContext";
 
+const UserAvatar = ({ user }) => {
+  const source = user?.username || user?.email || "U";
+  const initial = source.charAt(0).toUpperCase();
+  return (
+    <div
+      className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"
+      style={{ background: "#2D5A27", color: "#F9F6F0" }}
+    >
+      {initial}
+    </div>
+  );
+};
+
 // ─── Nav Link Definition by Role ──────────────────────────────────────────────
 const NAV_LINKS = {
   [ROLES.USER]: [
@@ -164,10 +177,7 @@ export default function Navbar() {
               <div className="relative" ref={dropdownRef}>
                 <button onClick={() => setDropdownOpen(!dropdownOpen)}
                   className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all hover:bg-gray-100">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white"
-                       style={{ background: "#C05746" }}>
-                    {initials}
-                  </div>
+                  <UserAvatar user={user} />
                   <span className="text-sm font-medium text-gray-700 hidden sm:block">
                     {user?.username || "Me"}
                   </span>

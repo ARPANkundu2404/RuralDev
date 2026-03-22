@@ -73,8 +73,8 @@ const ProtectedRoute = () => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // If authenticated but profile not complete, force profile setup
-  if (user && !user.profileComplete && location.pathname !== "/profile-setup") {
+  // If authenticated but USER profile not complete, force profile setup
+  if (user?.role === ROLES.USER && user?.is_profile_complete === false && location.pathname !== "/profile-setup") {
     return <Navigate to="/profile-setup" replace />;
   }
 
