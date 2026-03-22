@@ -195,7 +195,7 @@ export default function TrainerWorkshopsPage() {
 
   const fetchWorkshops = () => {
     setLoading(true);
-    workshopAPI.getAll({ trainerId: user?.id })
+    workshopAPI.getAll({ trainer_id: user?.id })
       .then(({ data }) => setWorkshops(data.workshops || []))
       .catch(() => setWorkshops(MOCK_TRAINER_WORKSHOPS))
       .finally(() => setLoading(false));
@@ -204,15 +204,21 @@ export default function TrainerWorkshopsPage() {
   useEffect(() => { fetchWorkshops(); }, []);
 
   const handleSave = async (formData) => {
+    const normalized = {
+      ...formData,
+      skill_category: formData.category,
+      max_participants: Number(formData.maxEnrollment || formData.max_participants || 20),
+    };
+
     if (editing) {
-      await workshopAPI.update(editing._id || editing.id, formData);
+      await workshopAPI.update(editing._id || editing.id, normalized);
       setWorkshops((ws) => ws.map((w) =>
-        (w._id === editing._id || w.id === editing.id) ? { ...w, ...formData } : w
+        (w._id === editing._id || w.id === editing.id) ? { ...w, ...normalized } : w
       ));
       showToast("Workshop updated!");
     } else {
-      const { data } = await workshopAPI.create(formData);
-      setWorkshops((ws) => [data.workshop || { ...formData, id: Date.now(), status: "PENDING" }, ...ws]);
+      const { data } = await workshopAPI.create(normalized);
+      setWorkshops((ws) => [data.workshop || { ...normalized, id: Date.now(), status: "PENDING" }, ...ws]);
       showToast("Workshop submitted for review!");
     }
     setEditing(null);

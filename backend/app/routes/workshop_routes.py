@@ -4,7 +4,7 @@ Trainers can propose workshops, users can view, admins approve/reject.
 """
 
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt
+from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity
 from marshmallow import ValidationError
 from app import db
 from app.models import Workshop, User
@@ -42,6 +42,7 @@ def list_workshops():
     per_page = request.args.get("per_page", 10, type=int)
     status = request.args.get("status")
     skill_category = request.args.get("skill_category")
+    trainer_id = request.args.get("trainer_id", type=int)
     
     query = Workshop.query
     
@@ -53,6 +54,9 @@ def list_workshops():
     
     if skill_category:
         query = query.filter_by(skill_category=skill_category)
+    
+    if trainer_id is not None:
+        query = query.filter_by(trainer_id=trainer_id)
     
     paginated = query.paginate(page=page, per_page=per_page)
     

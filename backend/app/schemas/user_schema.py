@@ -2,7 +2,7 @@
 Marshmallow schemas for request/response validation and serialization.
 """
 
-from marshmallow import Schema, fields, validate, ValidationError, pre_load
+from marshmallow import Schema, fields, validate, ValidationError, pre_load, EXCLUDE
 
 
 class UserRegisterSchema(Schema):
@@ -101,13 +101,16 @@ class ErrorResponseSchema(Schema):
 
 class WorkshopSchema(Schema):
     """Schema for workshop data."""
+    class Meta:
+        unknown = EXCLUDE
+
     id = fields.Int(dump_only=True)
     trainer_id = fields.Int()
     title = fields.Str(required=True, validate=validate.Length(min=3, max=255))
     description = fields.Str()
     skill_category = fields.Str(
         required=True,
-        validate=validate.OneOf(["Pottery", "Embroidery", "Weaving", "Painting", "Other"])
+        validate=validate.OneOf(["Pottery", "Embroidery", "Weaving", "Painting", "Art", "Craft", "Textile", "Baking", "Other"])
     )
     max_participants = fields.Int(missing=20, validate=validate.Range(min=1, max=100))
     status = fields.Str(
