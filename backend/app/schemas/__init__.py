@@ -15,6 +15,7 @@ from app.schemas.user_schema import (
     WorkshopSchema,
     JobSchema,
     ProductSchema,
+    ProfileCompleteSchema,
 )
 
 __all__ = [
@@ -29,4 +30,5 @@ __all__ = [
     "WorkshopSchema",
     "JobSchema",
     "ProductSchema",
+    ProfileCompleteSchema,
 ]
