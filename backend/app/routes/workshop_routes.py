@@ -4,7 +4,7 @@ Trainers can propose workshops, users can view, admins approve/reject.
 """
 
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_optional, get_jwt
+from flask_jwt_extended import jwt_required, get_jwt
 from marshmallow import ValidationError
 from app import db
 from app.models import Workshop, User
@@ -15,7 +15,7 @@ workshop_bp = Blueprint("workshops", __name__, url_prefix="/api/workshops")
 
 
 @workshop_bp.route("", methods=["GET"])
-@jwt_optional()
+@jwt_required(optional=True)
 def list_workshops():
     """
     List all approved workshops (public access), or all for authenticated admins.

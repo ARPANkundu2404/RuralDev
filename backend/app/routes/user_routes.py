@@ -8,7 +8,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from marshmallow import ValidationError
 from app import db
 from app.models import User
-from app.schemas import UserResponseSchema, UserUpdateSchema
+from app.schemas import UserResponseSchema, UserUpdateSchema, ProfileCompleteSchema
 from app.utils.decorators import admin_required, user_or_higher_required
 
 user_bp = Blueprint("users", __name__, url_prefix="/api/users")
@@ -348,4 +348,140 @@ def toggle_user_status(user_id):
         "success": True,
         "message": f"User {status} successfully",
         "user": UserResponseSchema().dump(user)
+    }), 200
+
+
+@user_bp.route("/<int:user_id>/profile-complete", methods=["POST"])
+@jwt_required()
+@user_or_higher_required
+def complete_profile(user_id):
+    """
+    Complete user profile (add bio, skills, location).
+    Users can only update their own profile.
+    
+    Request body:
+    {
+        "bio": "I am a potter...",
+        "skills": "Pottery, Ceramics, Wheel Throwing",
+        "location": "New Delhi, India"
+    }
+    
+    Response:
+    {
+        "status": 200,
+        "message": "Profile completed successfully",
+        "data": {...}
+    }
+    """
+    current_user_id = get_jwt_identity()
+    
+    # Check authorization - users can only update their own profile
+    if current_user_id != user_id:
+        current_user = User.query.get(current_user_id)
+        if current_user.role != "ADMIN":
+            return jsonify({
+                "status": 403,
+                "message": "You can only update your own profile"
+            }), 403
+    
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({
+            "status": 404,
+            "message": "User not found"
+        }), 404
+    
+    schema = ProfileCompleteSchema()
+    try:
+        data = schema.load(request.get_json())
+    except ValidationError as err:
+        return jsonify({
+            "status": 400,
+            "message": "Validation error",
+            "error": err.messages
+        }), 400
+    
+    # Update profile fields
+    user.bio = data.get("bio")
+    user.skills = data.get("skills")
+    user.location = data.get("location")
+    user.is_profile_complete = True
+    
+    db.session.commit()
+    
+    return jsonify({
+        "status": 200,
+        "message": "Profile completed successfully",
+        "data": UserResponseSchema().dump(user)
+    }), 200
+
+
+@user_bp.route("/public/list", methods=["GET"])
+def list_public_profiles():
+    """
+    List all public user profiles (no authentication required).
+    Only returns profiles marked as complete and active users.
+    
+    Query Parameters:
+    - page: Page number (default: 1)
+    - per_page: Items per page (default: 10)
+    - role: Filter by role (TRAINER, RECRUITER, SELLER)
+    
+    Response:
+    {
+        "status": 200,
+        "message": "Profiles retrieved",
+        "data": [...],
+        "total": 50,
+        "pages": 5,
+        "current_page": 1
+    }
+    """
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 10, type=int)
+    role = request.args.get("role")
+    
+    # Only return active users with complete profiles
+    query = User.query.filter_by(is_active=True, is_profile_complete=True)
+    
+    if role:
+        query = query.filter_by(role=role)
+    
+    paginated = query.paginate(page=page, per_page=per_page)
+    
+    return jsonify({
+        "status": 200,
+        "message": "Profiles retrieved",
+        "data": UserResponseSchema(many=True).dump(paginated.items),
+        "total": paginated.total,
+        "pages": paginated.pages,
+        "current_page": page
+    }), 200
+
+
+@user_bp.route("/public/<int:user_id>", methods=["GET"])
+def get_public_profile(user_id):
+    """
+    Get a public user profile by ID (no authentication required).
+    Only returns profile if user is active and has completed profile.
+    
+    Response:
+    {
+        "status": 200,
+        "message": "Profile retrieved",
+        "data": {...}
+    }
+    """
+    user = User.query.filter_by(id=user_id, is_active=True, is_profile_complete=True).first()
+    
+    if not user:
+        return jsonify({
+            "status": 404,
+            "message": "Public profile not found"
+        }), 404
+    
+    return jsonify({
+        "status": 200,
+        "message": "Profile retrieved",
+        "data": UserResponseSchema().dump(user)
     }), 200

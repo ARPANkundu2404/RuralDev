@@ -4,7 +4,7 @@ Recruiters can post jobs, users can view, admins approve/reject.
 """
 
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_optional, get_jwt
+from flask_jwt_extended import get_jwt, jwt_required
 from marshmallow import ValidationError
 from app import db
 from app.models import Job, User
@@ -15,7 +15,7 @@ job_bp = Blueprint("jobs", __name__, url_prefix="/api/jobs")
 
 
 @job_bp.route("", methods=["GET"])
-@jwt_optional()
+@jwt_required(optional=True)
 def list_jobs():
     """
     List all approved jobs (public access), or all for authenticated admins.
