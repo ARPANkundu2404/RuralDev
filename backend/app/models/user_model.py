@@ -29,13 +29,6 @@ class User(db.Model):
     role = db.Column(db.String(20), default=RoleEnum.USER.value, nullable=False)
     is_active = db.Column(db.Boolean, default=True)
     is_verified = db.Column(db.Boolean, default=False)
-    
-    # Profile fields
-    bio = db.Column(db.Text)  # User biography/description
-    skills = db.Column(db.String(500))  # Comma-separated skills
-    location = db.Column(db.String(255))  # User location
-    is_profile_complete = db.Column(db.Boolean, default=False)  # Profile completion flag
-    
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -62,10 +55,6 @@ class User(db.Model):
             "role": self.role,
             "is_active": self.is_active,
             "is_verified": self.is_verified,
-            "is_profile_complete": self.is_profile_complete,
-            "bio": self.bio,
-            "skills": self.skills,
-            "location": self.location,
             "created_at": self.created_at.isoformat(),
         }
         if include_email:

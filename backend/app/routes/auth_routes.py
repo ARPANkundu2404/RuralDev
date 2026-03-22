@@ -84,8 +84,7 @@ def register():
         "message": "Registration successful. Check your email.",
         "data": {
             "token": access_token,
-            "email": user.email,
-            "role": user.role
+            "user": UserResponseSchema().dump(user)
         }
     }), 201
 
@@ -141,8 +140,7 @@ def login():
         "message": "Successfully logged in",
         "data": {
             "token": token,
-            "email": user.email,
-            "role": user.role
+            "user": UserResponseSchema().dump(user)
         }
     }), 200
 

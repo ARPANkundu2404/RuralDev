@@ -61,10 +61,6 @@ class UserResponseSchema(Schema):
     role = fields.Str()
     is_active = fields.Bool()
     is_verified = fields.Bool()
-    is_profile_complete = fields.Bool()
-    bio = fields.Str()
-    skills = fields.Str()
-    location = fields.Str()
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
 
@@ -74,6 +70,10 @@ class UserUpdateSchema(Schema):
     username = fields.Str(validate=validate.Length(min=3, max=80))
     email = fields.Email()
     password = fields.Str(validate=validate.Length(min=8, max=255))
+    bio = fields.Str()
+    skills = fields.List(fields.Str())
+    location = fields.Str()
+    is_profile_complete = fields.Bool()
 
 
 class ProfileCompleteSchema(Schema):

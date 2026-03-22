@@ -4,7 +4,7 @@ Sellers can post products, users can view, admins approve/reject.
 """
 
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_optional, get_jwt
 from marshmallow import ValidationError
 from app import db
 from app.models import Product, User
@@ -15,11 +15,10 @@ product_bp = Blueprint("products", __name__, url_prefix="/api/products")
 
 
 @product_bp.route("", methods=["GET"])
-@jwt_required()
-@user_or_higher_required
+@jwt_optional()
 def list_products():
     """
-    List all approved products (or all for admins).
+    List all approved products (public access), or all for authenticated admins.
     
     Query Parameters:
     - status: Filter by status (PENDING, APPROVED, REJECTED)
@@ -38,10 +37,8 @@ def list_products():
         "current_page": 1
     }
     """
-    from flask_jwt_extended import get_jwt
-    
     claims = get_jwt()
-    user_role = claims.get("role")
+    user_role = claims.get("role") if claims else None
     
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 10, type=int)

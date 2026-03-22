@@ -152,16 +152,18 @@ const AppRoutes = () => {
           <Route path="/verify-email"   element={<PageTransition><VerifyEmailPage /></PageTransition>} />
           <Route path="/profile-setup"  element={<PageTransition><ProfileSetupPage /></PageTransition>} />
 
+          {/* Public pages for unauthenticated users */}
+          <Route path="/home"          element={<PageTransition><HomePage /></PageTransition>} />
+          <Route path="/jobs"          element={<PageTransition><JobsPage /></PageTransition>} />
+          <Route path="/workshops"     element={<PageTransition><WorkshopsPage /></PageTransition>} />
+          <Route path="/marketplace"   element={<PageTransition><MarketplacePage /></PageTransition>} />
+
           {/* ── Protected Routes (any authenticated user) ─────────────────── */}
           <Route element={<ProtectedRoute />}>
 
             {/* ── USER Routes ─────────────────────────────────────────────── */}
             <Route element={<RoleGate roles={[ROLES.USER, ROLES.ADMIN, ROLES.TRAINER, ROLES.RECRUITER, ROLES.SELLER]} />}>
-              <Route path="/home"          element={<PageTransition><HomePage /></PageTransition>} />
               <Route path="/skill-pathway" element={<PageTransition><SkillPathwayPage /></PageTransition>} />
-              <Route path="/marketplace"   element={<PageTransition><MarketplacePage /></PageTransition>} />
-              <Route path="/jobs"          element={<PageTransition><JobsPage /></PageTransition>} />
-              <Route path="/workshops"     element={<PageTransition><WorkshopsPage /></PageTransition>} />
             </Route>
 
             {/* ── TRAINER Routes ───────────────────────────────────────────── */}
